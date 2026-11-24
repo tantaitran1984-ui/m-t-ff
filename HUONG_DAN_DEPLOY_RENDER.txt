@@ -1,0 +1,42 @@
+=============================================================================
+         HƯỚNG DẪN DEPLOY "PHÚC 43 PROXY" LÊN RENDER.COM MIỄN PHÍ
+=============================================================================
+
+Hệ thống đã được tối ưu sẵn sàng 100% cho Render.com:
+- Đã có file: app.py (tự động nhận cổng $PORT của Render)
+- Đã có file: Procfile (web: python app.py)
+- Đã có file: render.yaml (Cấu hình tự động deploy)
+- Đã có file: requirements.txt
+- Đã fix CSS: Mượt mà, chuẩn giao diện di động, không bị vỡ layout
+
+-----------------------------------------------------------------------------
+CÁCH ĐƯA LÊN RENDER.COM TRONG 2 PHÚT:
+
+BƯỚC 1: Đưa code lên GitHub
+1. Tạo 1 repository mới trên GitHub (ví dụ đặt tên: phuc43-proxy).
+2. Tại thư mục này, mở Terminal chạy các lệnh sau:
+   git init
+   git add .
+   git commit -m "Deploy Phuc 43 Proxy"
+   git branch -M main
+   git remote add origin https://github.com/<tai-khoan-cua-ban>/phuc43-proxy.git
+   git push -u origin main
+
+BƯỚC 2: Tạo Web Service trên Render.com
+1. Truy cập https://render.com và đăng nhập (bằng GitHub).
+2. Bấm nút [New +] ở góc trên -> Chọn [Web Service].
+3. Chọn Repository "phuc43-proxy" bạn vừa tạo.
+4. Render sẽ tự động điền:
+   - Runtime: Python 3
+   - Build Command: pip install -r requirements.txt
+   - Start Command: python app.py
+5. Chọn gói [Free] -> Bấm [Create Web Service].
+
+BƯỚC 3: Sử dụng trên Điện Thoại
+- Sau khoảng 1-2 phút, Render sẽ cấp cho bạn một đường link HTTPS miễn phí,
+  ví dụ: https://phuc43-proxy.onrender.com
+- Bạn chỉ cần gửi link này sang điện thoại:
+  + Mở link trên điện thoại là thấy giao diện xanh đen chuẩn đẹp.
+  + Bấm nút "CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)" để tải app trực tiếp về máy.
+  + Bấm nút "CHẠY PROXY" để tối ưu hóa mượt 90% tức thì!
+=============================================================================

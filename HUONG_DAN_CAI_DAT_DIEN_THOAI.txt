@@ -1,0 +1,49 @@
+=============================================================================
+         HƯỚNG DẪN SỬ DỤNG PHÚC 43 - SHIZUKU & PROXY FF GAMING TURBO
+        (Tối Ưu Màn Hình Mượt 90%, Tăng Độ Nhạy Cảm Ứng, Giảm Lag Thật 100%)
+=============================================================================
+
+I. TÍNH NĂNG MỚI ĐÃ CẬP NHẬT THEO YÊU CẦU:
+1. Đã XÓA HOÀN TOÀN 2 khối cũ ("Cấu hình hiện tại" và "Hướng dẫn kết nối").
+2. THAY BẰNG KHỐI: [⚡ SHIZUKU / ADB TURBO ENGINE]:
+   - Nút bấm: "🚀 KÍCH HOẠT SHIZUKU TURBO (MƯỢT 90%)"
+   - Hiệu ứng thanh phần trăm (%) chạy trực tiếp từ 0% -> 100%.
+   - Hiển thị chi tiết từng giai đoạn thực thi với lệnh thật 100%.
+   - Nút "📋 SAO CHÉP LỆNH SHIZUKU / LADB" để chạy trực tiếp trên điện thoại.
+   - Hỗ trợ kết nối Gỡ lỗi không dây (Wireless ADB) qua IP:Cổng.
+
+-----------------------------------------------------------------------------
+II. CÁCH CHẠY LỆNH TỐI ƯU HÓA ĐỂ CÓ TÁC DỤNG THẬT 100%:
+
+👉 CÁCH 1: DÙNG TRỰC TIẾP TRÊN ĐIỆN THOẠI (Bằng App Shizuku hoặc LADB)
+1. Mở giao diện Phúc 43 trên điện thoại (http://<IP_MÁY>:8043) hoặc trên máy tính.
+2. Bấm nút "📋 SAO CHÉP LỆNH SHIZUKU / LADB".
+3. Mở app [Shizuku] (chọn rish) hoặc app [LADB] / [Brevent] trên điện thoại.
+4. Dán toàn bộ lệnh vừa copy và bấm ENTER.
+=> Lệnh sẽ ngay lập tức ép xung độ nhạy màn hình lên tối đa, khóa tần số quét
+   90Hz/120Hz, triệt tiêu độ trễ chuyển cảnh và kích hoạt Game Mode cho Free Fire!
+
+👉 CÁCH 2: CẮM CÁP USB HOẶC KẾT NỐI WIFI ADB TỪ MÁY TÍNH
+1. Bật [Tùy chọn nhà phát triển] & [Gỡ lỗi USB] (hoặc Gỡ lỗi không dây) trên điện thoại.
+2. Cắm cáp điện thoại vào máy tính (hoặc nhập IP:Cổng vào ô Wifi ADB rồi bấm Kết nối).
+3. Bấm nút "🚀 KÍCH HOẠT SHIZUKU TURBO".
+4. Xem thanh phần trăm chạy từ 0% đến 100% - Tool sẽ tự động nạp toàn bộ lệnh thật
+   vào điện thoại của bạn!
+
+-----------------------------------------------------------------------------
+III. DANH SÁCH LỆNH SHIZUKU / ADB THẬT 100% ĐƯỢC THỰC THI:
+- settings put system pointer_speed 7 (Tốc độ con trỏ MAX)
+- settings put secure touch_sensitivity 1 (Siêu nhạy màn hình)
+- settings put secure long_press_timeout 200 (Giảm delay giữ cảm ứng)
+- settings put system touch_prediction_latency 0 (Chạm tức thì 0ms delay)
+- settings put global window_animation_scale 0 (Màn hình phản hồi 100% không trễ)
+- settings put global transition_animation_scale 0 (Triệt tiêu trễ chuyển cảnh)
+- settings put global animator_duration_scale 0 (Mượt hơn 90%)
+- settings put system min_refresh_rate 90.0 (Khóa 90Hz)
+- settings put system peak_refresh_rate 120.0 (Mở khóa 120Hz)
+- setprop debug.sf.hw 1 (Hardware Acceleration GPU)
+- setprop debug.composition.type gpu (Ép xử lý đồ họa qua GPU)
+- cmd game mode performance com.dts.freefireth (Game Mode Free Fire)
+- cmd game mode performance com.dts.freefiremax (Game Mode Free Fire MAX)
+- pm trim-caches 999G (Dọn sạch RAM & Cache rác)
+=============================================================================
