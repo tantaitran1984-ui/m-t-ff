@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>PHÚC 43 - PROXY FF & SHIZUKU TURBO</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060A14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
@@ -229,7 +233,7 @@
       transform: scale(0.98);
     }
 
-    /* Button "CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)" */
+    /* Button "TẢI FILE CÀI ĐẶT APP (.APK)" */
     .btn-install {
       width: 100%;
       margin-top: 10px;
@@ -256,6 +260,30 @@
     }
     .btn-install:active {
       transform: scale(0.98);
+    }
+
+    /* Backup download link */
+    .btn-backup {
+      width: 100%;
+      margin-top: 8px;
+      background: #142038;
+      border: 1px solid #243B66;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #93C5FD;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-backup:hover {
+      background: #1E3A8A;
+      color: #fff;
     }
 
     /* Percentage Progress Bar Section */
@@ -368,9 +396,14 @@
         <span>🚀 CHẠY PROXY</span>
       </button>
 
-      <!-- Nút CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK) -->
-      <a href="/download_apk" class="btn-install" download="Phuc43_Turbo_Shizuku.apk" onclick="handleInstallClick()">
-        <span>📥 CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)</span>
+      <!-- Nút TẢI APP (.APK) TRỰC TIẾP TỪ FILE GỐC (2.3MB) -->
+      <a href="Phuc43_Turbo_Shizuku.apk" class="btn-install" download="Phuc43_Turbo_Shizuku.apk">
+        <span>📥 TẢI APP CÀI ĐẶT VỀ ĐIỆN THOẠI (.APK)</span>
+      </a>
+
+      <!-- Link tải dự phòng CDN tốc độ cao (Tránh lỗi Chrome chặn) -->
+      <a href="https://gitlab.com/-/project/41295637/uploads/7352fb3dff15901adffa9af19f487a4b/app-release.apk" class="btn-backup" download="Phuc43_Turbo_Shizuku.apk" target="_blank">
+        <span>🔄 Link tải dự phòng (Dành cho máy báo lỗi tệp)</span>
       </a>
 
       <!-- Khối Hiệu Ứng Phần Trăm (%) Xuất Hiện Khi Chạy -->
@@ -395,10 +428,6 @@
   </div>
 
   <script>
-    function handleInstallClick() {
-      alert("Đang tải file 'Phuc43_Turbo_Shizuku.apk' về máy!\n\nSau khi tải xong, bạn mở file ra bấm 'Cài đặt', mở app lên cho phép Shizuku ủy quyền là toàn bộ lệnh mượt 90% và siêu nhạy sẽ xuyên thẳng vào hệ thống máy 100%!");
-    }
-
     async function startRunningProxy() {
       const btn = document.getElementById('btn_run_proxy');
       const progressSec = document.getElementById('progress_section');
@@ -445,7 +474,7 @@
       btn.innerHTML = "<span>✅ ĐÃ CHẠY PROXY (MƯỢT 90%)</span>";
       btn.style.background = "linear-gradient(135deg, #059669, #10B981)";
 
-      alert("Thành công! Đã chạy Proxy VIP của Phúc và kích hoạt tối ưu hóa màn hình mượt 90% & siêu nhạy!\n\nBạn có thể bấm nút xanh 'CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)' để cài app chạy vĩnh viễn trên máy!");
+      alert("Thành công! Đã chạy Proxy VIP của Phúc và kích hoạt tối ưu hóa màn hình mượt 90% & siêu nhạy!\n\nBạn có thể bấm nút xanh 'TẢI APP CÀI ĐẶT VỀ ĐIỆN THOẠI (.APK)' để cài app chạy vĩnh viễn trên máy!");
     }
   </script>
 </body>
