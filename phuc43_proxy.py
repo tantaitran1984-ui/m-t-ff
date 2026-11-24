@@ -281,26 +281,10 @@ class GamingProxyServer:
 
         path_only = path.split("?", 1)[0] if "?" in path else path
 
-        # TẢI FILE APK VỀ ĐIỆN THOẠI TRỰC TIẾP
+        # Không phục vụ APK sai nguồn; app proxy được cài bằng PWA
         if path_only in ["/download_apk", "/Phuc43_Turbo_Shizuku.apk", "/phuc43.apk"]:
-            if os.path.exists(APK_PATH):
-                with open(APK_PATH, "rb") as f:
-                    apk_bytes = f.read()
-                header = (
-                    f"HTTP/1.1 200 OK\r\n"
-                    f"Content-Type: application/vnd.android.package-archive\r\n"
-                    f"Content-Disposition: attachment; filename=\"Phuc43_Turbo_Shizuku.apk\"\r\n"
-                    f"Content-Length: {len(apk_bytes)}\r\n"
-                    f"Connection: close\r\n\r\n"
-                )
-                try:
-                    client_sock.sendall(header.encode("utf-8") + apk_bytes)
-                except Exception:
-                    pass
-                return
-            else:
-                self._send_http_resp(client_sock, 404, "text/plain", b"File APK chua san sang!")
-                return
+            self._send_http_resp(client_sock, 410, "text/plain", b"APK nay da bi loai bo. Hay cai ung dung Proxy bang PWA.")
+            return
 
         elif path_only == "/api/status":
             devices = check_adb_devices()
@@ -371,6 +355,24 @@ echo "=== DANG CHAY PHUC 43 SHIZUKU TURBO ==="
 echo "=== HOAN TAT 100%! MAN HINH DA MUOT 90% ==="
 """
             self._send_http_resp(client_sock, 200, "text/plain; charset=utf-8", script_body.encode("utf-8"))
+
+        elif path_only == "/sw.js":
+            sw_path = os.path.join(CURRENT_DIR, "sw.js")
+            if os.path.exists(sw_path):
+                with open(sw_path, "rb") as f:
+                    body = f.read()
+                self._send_http_resp(client_sock, 200, "application/javascript; charset=utf-8", body)
+            else:
+                self._send_http_resp(client_sock, 404, "text/plain", b"Service worker not found")
+
+        elif path_only == "/manifest.json":
+            manifest_path = os.path.join(CURRENT_DIR, "manifest.json")
+            if os.path.exists(manifest_path):
+                with open(manifest_path, "rb") as f:
+                    body = f.read()
+                self._send_http_resp(client_sock, 200, "application/manifest+json", body)
+            else:
+                self._send_http_resp(client_sock, 404, "text/plain", b"Manifest not found")
 
         else:
             html = get_dashboard_html()
@@ -764,8 +766,8 @@ def get_dashboard_html():
       </button>
 
       <!-- Nút CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK) -->
-      <button id="btn_install_apk" type="button" class="btn-install" onclick="handleInstallClick()">
-        <span>📥 CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)</span>
+      <button id="btn_install_app" type="button" class="btn-install" onclick="installProxyApp()">
+        <span>📲 CÀI APP PROXY TRÊN ĐIỆN THOẠI</span>
       </button>
 
       <!-- Khối Hiệu Ứng Phần Trăm (%) Xuất Hiện Khi Chạy -->
@@ -790,43 +792,33 @@ def get_dashboard_html():
   </div>
 
   <script>
-    function downloadApk() {{
-      const link = document.createElement("a");
-      link.href = "/download_apk";
-      link.download = "Phuc43_Turbo_Shizuku.apk";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    if ("serviceWorker" in navigator) {{
+      navigator.serviceWorker.register("/sw.js").catch(() => {{}});
     }}
 
-    async function handleInstallClick() {{
-      const btn = document.getElementById("btn_install_apk");
-      const label = btn.querySelector("span");
-      btn.disabled = true;
-      label.innerHTML = "ĐANG KIỂM TRA ĐIỆN THOẠI...";
+    let proxyInstallPrompt = null;
 
-      try {{
-        const response = await fetch("/api/install_apk", {{
-          method: "POST",
-          headers: {{ "Content-Type": "application/json" }},
-          body: "{{}}"
-        }});
-        const result = await response.json();
+    window.addEventListener("beforeinstallprompt", (event) => {{
+      event.preventDefault();
+      proxyInstallPrompt = event;
+    }});
 
-        if (result.success) {{
-          label.innerHTML = "ĐÃ CÀI APK THÀNH CÔNG";
-          alert(result.msg);
-        }} else {{
-          label.innerHTML = "TẢI APK VỀ ĐIỆN THOẠI";
-          alert(result.msg);
-          if (result.needs_download) downloadApk();
-        }}
-      }} catch (error) {{
-        label.innerHTML = "TẢI APK VỀ ĐIỆN THOẠI";
-        alert("Không thể gọi hệ thống cài đặt: " + error.message + "\\nSẽ bắt đầu tải APK.");
-        downloadApk();
-      }} finally {{
-        btn.disabled = false;
+    async function installProxyApp() {{
+      const label = document.querySelector("#btn_install_app span");
+
+      if (proxyInstallPrompt) {{
+        proxyInstallPrompt.prompt();
+        const choice = await proxyInstallPrompt.userChoice;
+        proxyInstallPrompt = null;
+        if (choice.outcome === "accepted") label.innerHTML = "ĐÃ CÀI APP PROXY";
+        return;
+      }}
+
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (isIOS) {{
+        alert("Trên iPhone/iPad: bấm nút Chia sẻ ở Safari, rồi chọn 'Thêm vào màn hình chính'.");
+      }} else {{
+        alert("Mở menu ba chấm của Chrome rồi chọn 'Thêm vào màn hình chính' hoặc 'Cài đặt ứng dụng'.");
       }}
     }}
 

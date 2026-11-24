@@ -396,15 +396,10 @@
         <span>🚀 CHẠY PROXY</span>
       </button>
 
-      <!-- Nút TẢI APP (.APK) TRỰC TIẾP TỪ FILE GỐC (2.3MB) -->
-      <a href="Phuc43_Turbo_Shizuku.apk" class="btn-install" download="Phuc43_Turbo_Shizuku.apk">
-        <span>📥 TẢI APP CÀI ĐẶT VỀ ĐIỆN THOẠI (.APK)</span>
-      </a>
-
-      <!-- Link tải dự phòng CDN tốc độ cao (Tránh lỗi Chrome chặn) -->
-      <a href="https://gitlab.com/-/project/41295637/uploads/7352fb3dff15901adffa9af19f487a4b/app-release.apk" class="btn-backup" download="Phuc43_Turbo_Shizuku.apk" target="_blank">
-        <span>🔄 Link tải dự phòng (Dành cho máy báo lỗi tệp)</span>
-      </a>
+      <!-- Cài giao diện Proxy dưới dạng app PWA, không tải APK không rõ nguồn -->
+      <button id="btn_install_app" type="button" class="btn-install" onclick="installProxyApp()">
+        <span>📲 CÀI APP PROXY TRÊN ĐIỆN THOẠI</span>
+      </button>
 
       <!-- Khối Hiệu Ứng Phần Trăm (%) Xuất Hiện Khi Chạy -->
       <div id="progress_section" class="progress-section">
@@ -428,6 +423,38 @@
   </div>
 
   <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    let proxyInstallPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      proxyInstallPrompt = event;
+    });
+
+    async function installProxyApp() {
+      const label = document.querySelector("#btn_install_app span");
+
+      if (proxyInstallPrompt) {
+        proxyInstallPrompt.prompt();
+        const choice = await proxyInstallPrompt.userChoice;
+        proxyInstallPrompt = null;
+        if (choice.outcome === "accepted") {
+          label.innerHTML = "ĐÃ CÀI APP PROXY";
+        }
+        return;
+      }
+
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (isIOS) {
+        alert("Trên iPhone/iPad: bấm nút Chia sẻ ở Safari, rồi chọn 'Thêm vào màn hình chính'.");
+      } else {
+        alert("Mở menu ba chấm của Chrome rồi chọn 'Thêm vào màn hình chính' hoặc 'Cài đặt ứng dụng'.");
+      }
+    }
+
     async function startRunningProxy() {
       const btn = document.getElementById('btn_run_proxy');
       const progressSec = document.getElementById('progress_section');
