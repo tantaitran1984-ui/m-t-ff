@@ -56,7 +56,15 @@ def index():
 @app.route("/Phuc43_Turbo_Shizuku.apk")
 @app.route("/phuc43.apk")
 def download_apk():
-    return "APK sai nguồn đã bị loại bỏ. Hãy cài ứng dụng Proxy bằng PWA.", 410
+    apk_path = os.path.join(CURRENT_DIR, "Phuc43_Proxy.apk")
+    if os.path.exists(apk_path):
+        return send_from_directory(
+            CURRENT_DIR,
+            "Phuc43_Proxy.apk",
+            as_attachment=True,
+            mimetype="application/vnd.android.package-archive"
+        )
+    return "APK Phuc43 Proxy chưa được build.", 404
 
 # 3. Lấy script Shizuku
 @app.route("/shizuku.sh")

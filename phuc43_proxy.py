@@ -260,9 +260,25 @@ class GamingProxyServer:
 
         path_only = path.split("?", 1)[0] if "?" in path else path
 
-        # Không phục vụ APK sai nguồn; app proxy được cài bằng PWA
+        # APK Android native thật
         if path_only in ["/download_apk", "/Phuc43_Turbo_Shizuku.apk", "/phuc43.apk"]:
-            self._send_http_resp(client_sock, 410, "text/plain", b"APK nay da bi loai bo. Hay cai ung dung Proxy bang PWA.")
+            apk_path = os.path.join(CURRENT_DIR, "Phuc43_Proxy.apk")
+            if os.path.exists(apk_path):
+                with open(apk_path, "rb") as f:
+                    apk_bytes = f.read()
+                header = (
+                    "HTTP/1.1 200 OK\r\n"
+                    "Content-Type: application/vnd.android.package-archive\r\n"
+                    'Content-Disposition: attachment; filename="Phuc43_Proxy.apk"\r\n'
+                    f"Content-Length: {len(apk_bytes)}\r\n"
+                    "Connection: close\r\n\r\n"
+                )
+                try:
+                    client_sock.sendall(header.encode("utf-8") + apk_bytes)
+                except Exception:
+                    pass
+            else:
+                self._send_http_resp(client_sock, 404, "text/plain", b"APK Phuc43 Proxy chua san sang!")
             return
 
         elif path_only == "/api/status":
