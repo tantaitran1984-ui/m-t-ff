@@ -4,13 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>PHÚC 43 - PROXY FF & SHIZUKU TURBO</title>
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#060A14">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #060A14;
@@ -204,6 +198,11 @@
       border-color: var(--accent-cyan);
       box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
     }
+    #server_address {
+      height: 48px;
+      margin-top: 6px;
+      resize: vertical;
+    }
 
     /* Button "CHẠY PROXY" */
     .btn-run {
@@ -396,10 +395,8 @@
         <span>🚀 CHẠY PROXY</span>
       </button>
 
-      <!-- Cài giao diện Proxy dưới dạng app PWA, không tải APK không rõ nguồn -->
-      <a id="btn_install_app" href="/download_apk" class="btn-install" download="Phuc43_Proxy.apk">
-        <span>📲 TẢI APP PROXY (.APK)</span>
-      </a>
+      <label for="server_address" class="progress-stage">Địa chỉ máy chạy server (cùng Wi-Fi):</label>
+      <input id="server_address" class="input-box" type="url" autocomplete="url" value="http://192.168.123.22:8043" aria-label="Địa chỉ máy chủ proxy">
 
       <!-- Khối Hiệu Ứng Phần Trăm (%) Xuất Hiện Khi Chạy -->
       <div id="progress_section" class="progress-section">
@@ -423,42 +420,32 @@
   </div>
 
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    const serverAddress = document.getElementById("server_address");
+    const savedServerAddress = localStorage.getItem("phuc43_server_address");
+    if (savedServerAddress) serverAddress.value = savedServerAddress;
+    else if (!["http:", "https:"].includes(window.location.protocol)) {
+      serverAddress.value = "http://192.168.123.22:8043";
+    } else {
+      serverAddress.value = window.location.origin;
     }
 
-    let proxyInstallPrompt = null;
-
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
-      proxyInstallPrompt = event;
+    serverAddress.addEventListener("change", () => {
+      localStorage.setItem("phuc43_server_address", serverAddress.value.trim().replace(/\/+$/, ""));
+      refreshDeviceStatus();
     });
 
-    async function installProxyApp() {
-      const label = document.querySelector("#btn_install_app span");
-
-      if (proxyInstallPrompt) {
-        proxyInstallPrompt.prompt();
-        const choice = await proxyInstallPrompt.userChoice;
-        proxyInstallPrompt = null;
-        if (choice.outcome === "accepted") {
-          label.innerHTML = "ĐÃ CÀI APP PROXY";
-        }
-        return;
+    function apiUrl(path) {
+      const base = serverAddress.value.trim().replace(/\/+$/, "");
+      if (!/^https?:\/\/[^/]+$/i.test(base)) {
+        throw new Error("Địa chỉ máy chủ không hợp lệ. Ví dụ: http://192.168.1.10:8043");
       }
-
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      if (isIOS) {
-        alert("Trên iPhone/iPad: bấm nút Chia sẻ ở Safari, rồi chọn 'Thêm vào màn hình chính'.");
-      } else {
-        alert("Mở menu ba chấm của Chrome rồi chọn 'Thêm vào màn hình chính' hoặc 'Cài đặt ứng dụng'.");
-      }
+      return base + path;
     }
 
     async function refreshDeviceStatus() {
       const status = document.getElementById("device_status");
       try {
-        const response = await fetch("/api/status");
+        const response = await fetch(apiUrl("/api/status"));
         const result = await response.json();
         if (result.connected) {
           status.textContent = "ADB ĐÃ KẾT NỐI";
@@ -485,11 +472,16 @@
 
       let result;
       try {
-        const response = await fetch('/api/run_proxy', {
+        const response = await fetch(apiUrl('/api/run_proxy'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: codeVal })
         });
+        const contentType = response.headers.get("content-type") || "";
+        if (!response.ok || !contentType.includes("application/json")) {
+          const text = await response.text();
+          throw new Error(text || ("Máy chủ trả HTTP " + response.status));
+        }
         result = await response.json();
       } catch (error) {
         result = { success: false, msg: "Không gọi được máy chủ proxy: " + error.message };

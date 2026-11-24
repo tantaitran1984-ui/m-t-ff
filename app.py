@@ -14,6 +14,14 @@ from flask import Flask, send_from_directory, jsonify, request, Response
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
+@app.after_request
+def add_api_cors_headers(response):
+    if request.path.startswith("/api/"):
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ADB_PATH = os.path.join(CURRENT_DIR, "platform-tools", "adb.exe")
 if not os.path.exists(ADB_PATH):
@@ -73,8 +81,10 @@ def shizuku_script():
     return Response(body, mimetype="text/plain; charset=utf-8")
 
 # 4. API Chạy Proxy & Kích hoạt Shizuku
-@app.route("/api/run_proxy", methods=["POST"])
+@app.route("/api/run_proxy", methods=["POST", "OPTIONS"])
 def api_run_proxy():
+    if request.method == "OPTIONS":
+        return "", 204
     data = request.get_json(silent=True) or {}
     code = data.get("code", "").strip()
 

@@ -1,0 +1,10 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8043
+ * Running on http://192.168.123.22:8043
+Press CTRL+C to quit
+127.0.0.1 - - [24/Nov/2026 15:33:25] "GET /api/status HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2026 15:33:25] "OPTIONS /api/run_proxy HTTP/1.1" 204 -
+127.0.0.1 - - [24/Nov/2026 15:33:47] "GET /download_apk HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2026 15:33:52] "GET /api/status HTTP/1.1" 200 -
+127.0.0.1 - - [24/Nov/2026 15:33:52] "OPTIONS /api/run_proxy HTTP/1.1" 204 -
