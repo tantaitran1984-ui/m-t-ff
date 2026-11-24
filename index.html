@@ -367,7 +367,7 @@
     <div class="header-bar">
       <div>
         <div class="brand-title">⚡ PHÚC 43 - PROXY FF</div>
-        <div class="brand-sub">Shizuku Turbo • Mượt Màn 90% & Siêu Nhạy</div>
+        <div class="brand-sub">Proxy thật • Trạng thái thiết bị thật</div>
       </div>
       <div class="live-status-pill">
         <div class="pulse-dot"></div>
@@ -378,14 +378,14 @@
     <!-- KHỐI CHÍNH DUY NHẤT -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title"><span>🚀</span> SHIZUKU TURBO & PROXY CORE</div>
-        <span style="font-size:10px; color:#10B981; font-weight:800;">100% HIỆU QUẢ THẬT</span>
+        <div class="card-title"><span>🚀</span> PROXY CORE</div>
+        <span id="device_status" style="font-size:10px; color:#F59E0B; font-weight:800;">ĐANG KIỂM TRA</span>
       </div>
 
       <div class="badges-row">
-        <div class="turbo-badge green">🚀 Mượt 70% - 90%</div>
-        <div class="turbo-badge hot">🎯 Siêu Nhạy Màn Hình</div>
-        <div class="turbo-badge">⚡ 0ms Delay</div>
+        <div class="turbo-badge green">Tình trạng: kiểm tra ADB</div>
+        <div class="turbo-badge hot">Không hứa tăng FPS</div>
+        <div class="turbo-badge">Không thay hệ thống giả lập</div>
       </div>
 
       <!-- Ô nạp code: Placeholder chuẩn theo yêu cầu -->
@@ -455,53 +455,56 @@
       }
     }
 
+    async function refreshDeviceStatus() {
+      const status = document.getElementById("device_status");
+      try {
+        const response = await fetch("/api/status");
+        const result = await response.json();
+        if (result.connected) {
+          status.textContent = "ADB ĐÃ KẾT NỐI";
+          status.style.color = "#10B981";
+        } else {
+          status.textContent = "CHƯA CÓ THIẾT BỊ";
+          status.style.color = "#F59E0B";
+        }
+      } catch (error) {
+        status.textContent = "KHÔNG KIỂM TRA ĐƯỢC";
+        status.style.color = "#EF4444";
+      }
+    }
+
+    refreshDeviceStatus();
+
     async function startRunningProxy() {
       const btn = document.getElementById('btn_run_proxy');
-      const progressSec = document.getElementById('progress_section');
-      const percentLbl = document.getElementById('progress_percent_lbl');
-      const stageLbl = document.getElementById('progress_stage_lbl');
-      const barFill = document.getElementById('progress_bar_fill');
-      const logBox = document.getElementById('log_box');
       const codeVal = document.getElementById('proxy_code_input').value.trim();
 
       btn.disabled = true;
       btn.style.opacity = "0.75";
-      progressSec.style.display = "block";
-      logBox.innerHTML = "";
+      btn.innerHTML = "<span>ĐANG KIỂM TRA THIẾT BỊ...</span>";
 
+      let result;
       try {
-        fetch('/api/run_proxy', {
+        const response = await fetch('/api/run_proxy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: codeVal })
-        }).catch(e => console.warn(e));
-      } catch (e) {}
-
-      const stages = [
-        { pct: 15, msg: "Đang kết nối dịch vụ Shizuku ADB Core...", log: "[+] Khởi tạo kết nối Shizuku API..." },
-        { pct: 35, msg: "Xuyên cấu hình: Ép xung độ nhạy con trỏ cảm ứng...", log: "[✓] settings put system pointer_speed 7\n[✓] settings put secure touch_sensitivity 1" },
-        { pct: 55, msg: "Xuyên cấu hình: Triệt tiêu trễ chuyển cảnh (Mượt 90%)...", log: "[✓] window_animation_scale = 0\n[✓] animator_duration_scale = 0" },
-        { pct: 75, msg: "Xuyên cấu hình: Khóa tần số quét cao 90Hz / 120Hz...", log: "[✓] peak_refresh_rate = 120.0\n[✓] force_90_hz = 1" },
-        { pct: 90, msg: "Kích hoạt Game Mode PERFORMANCE cho Free Fire...", log: "[✓] cmd game mode performance com.dts.freefireth\n[✓] GPU Hardware Acceleration = ON" },
-        { pct: 100, msg: "ĐÃ XUYÊN CẤU HÌNH THÀNH CÔNG 100%! MƯỢT 90% & SIÊU NHẠY!", log: "[★] HOÀN TẤT 100%: Thiết bị đã được tối ưu hóa toàn diện!" }
-      ];
-
-      for (let i = 0; i < stages.length; i++) {
-        const s = stages[i];
-        percentLbl.innerText = s.pct + "%";
-        barFill.style.width = s.pct + "%";
-        stageLbl.innerText = s.msg;
-        logBox.innerHTML += s.log.replace(/\n/g, "<br>") + "<br>";
-        logBox.scrollTop = logBox.scrollHeight;
-        await new Promise(r => setTimeout(r, 420));
+        });
+        result = await response.json();
+      } catch (error) {
+        result = { success: false, msg: "Không gọi được máy chủ proxy: " + error.message };
       }
 
       btn.disabled = false;
       btn.style.opacity = "1";
-      btn.innerHTML = "<span>✅ ĐÃ CHẠY PROXY (MƯỢT 90%)</span>";
-      btn.style.background = "linear-gradient(135deg, #059669, #10B981)";
-
-      alert("Thành công! Đã chạy Proxy VIP của Phúc và kích hoạt tối ưu hóa màn hình mượt 90% & siêu nhạy!\n\nBạn có thể bấm nút xanh 'TẢI APP CÀI ĐẶT VỀ ĐIỆN THOẠI (.APK)' để cài app chạy vĩnh viễn trên máy!");
+      if (result.success) {
+        btn.innerHTML = "<span>✅ ĐÃ KẾT NỐI THIẾT BỊ</span>";
+        btn.style.background = "linear-gradient(135deg, #059669, #10B981)";
+      } else {
+        btn.innerHTML = "<span>🚀 CHẠY PROXY</span>";
+        btn.style.background = "linear-gradient(135deg, #0284C7 0%, #2563EB 55%, #4F46E5 100%)";
+      }
+      alert(result.msg);
     }
   </script>
 </body>
