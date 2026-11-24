@@ -32,7 +32,7 @@ APK_PATH = os.path.join(CURRENT_DIR, "Phuc43_Turbo_Shizuku.apk")
 def run_adb_command(cmd_args):
     try:
         full_cmd = [ADB_PATH] + cmd_args
-        res = subprocess.run(full_cmd, capture_output=True, text=True, timeout=6)
+        res = subprocess.run(full_cmd, capture_output=True, text=True, timeout=60)
         return res.returncode == 0, res.stdout.strip()
     except Exception as e:
         return False, str(e)
@@ -311,6 +311,26 @@ class GamingProxyServer:
                 "adb_devices": devices
             }, ensure_ascii=False).encode("utf-8")
             self._send_http_resp(client_sock, 200, "application/json; charset=utf-8", body)
+
+        elif path_only == "/api/install_apk" and method == "POST":
+            if not os.path.exists(APK_PATH):
+                resp = {"success": False, "msg": "Khong tim thay file APK tren may tinh."}
+            else:
+                devices = check_adb_devices()
+                if not devices:
+                    resp = {
+                        "success": False,
+                        "needs_download": True,
+                        "msg": "Khong tim thay dien thoai qua ADB. Ket noi dien thoai bang USB va bat Uu tien USB Debugging, hoac tai APK ve dien thoai."
+                    }
+                else:
+                    success, output = run_adb_command(["-s", devices[0], "install", "-r", "-d", APK_PATH])
+                    combined = (output or "").strip()
+                    if success and "success" in combined.lower():
+                        resp = {"success": True, "device_name": devices[0], "msg": "Da cai APK thanh cong tren dien thoai."}
+                    else:
+                        resp = {"success": False, "device_name": devices[0], "msg": combined or "ADB khong the cai APK. Hay cho phep cai dat qua USB tren dien thoai."}
+            self._send_http_resp(client_sock, 200, "application/json; charset=utf-8", json.dumps(resp, ensure_ascii=False).encode("utf-8"))
 
         elif path_only == "/api/run_proxy" and method == "POST":
             try:
@@ -744,9 +764,9 @@ def get_dashboard_html():
       </button>
 
       <!-- Nút CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK) -->
-      <a href="/download_apk" class="btn-install" download="Phuc43_Turbo_Shizuku.apk" onclick="handleInstallClick()">
+      <button id="btn_install_apk" type="button" class="btn-install" onclick="handleInstallClick()">
         <span>📥 CÀI ĐẶT & TẢI VỀ ĐIỆN THOẠI (.APK)</span>
-      </a>
+      </button>
 
       <!-- Khối Hiệu Ứng Phần Trăm (%) Xuất Hiện Khi Chạy -->
       <div id="progress_section" class="progress-section">
@@ -770,8 +790,44 @@ def get_dashboard_html():
   </div>
 
   <script>
-    function handleInstallClick() {{
-      alert("Đang tải file 'Phuc43_Turbo_Shizuku.apk' về máy!\\n\\nSau khi tải xong, bạn mở file ra bấm 'Cài đặt', mở app lên cho phép Shizuku ủy quyền là toàn bộ lệnh mượt 90% và siêu nhạy sẽ xuyên thẳng vào hệ thống máy 100%!");
+    function downloadApk() {{
+      const link = document.createElement("a");
+      link.href = "/download_apk";
+      link.download = "Phuc43_Turbo_Shizuku.apk";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }}
+
+    async function handleInstallClick() {{
+      const btn = document.getElementById("btn_install_apk");
+      const label = btn.querySelector("span");
+      btn.disabled = true;
+      label.innerHTML = "ĐANG KIỂM TRA ĐIỆN THOẠI...";
+
+      try {{
+        const response = await fetch("/api/install_apk", {{
+          method: "POST",
+          headers: {{ "Content-Type": "application/json" }},
+          body: "{{}}"
+        }});
+        const result = await response.json();
+
+        if (result.success) {{
+          label.innerHTML = "ĐÃ CÀI APK THÀNH CÔNG";
+          alert(result.msg);
+        }} else {{
+          label.innerHTML = "TẢI APK VỀ ĐIỆN THOẠI";
+          alert(result.msg);
+          if (result.needs_download) downloadApk();
+        }}
+      }} catch (error) {{
+        label.innerHTML = "TẢI APK VỀ ĐIỆN THOẠI";
+        alert("Không thể gọi hệ thống cài đặt: " + error.message + "\\nSẽ bắt đầu tải APK.");
+        downloadApk();
+      }} finally {{
+        btn.disabled = false;
+      }}
     }}
 
     async function startRunningProxy() {{
